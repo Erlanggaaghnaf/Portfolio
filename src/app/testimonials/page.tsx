@@ -22,7 +22,8 @@ export default function TestimonialsPage() {
       try {
         const { data, error } = await supabase
           .from('testimonials')
-          .select('*'); // Mengambil seluruh data tanpa memfilter status dulu
+          .select('*')
+          .eq('is_approved', true);
 
         if (error) throw error;
         if (data) setTestimonials(data);
