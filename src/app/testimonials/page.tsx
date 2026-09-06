@@ -11,30 +11,48 @@ type Testimonial = {
   name: string;
   role: string;
   message: string;
+  is_approved: boolean;
 };
 
 export default function TestimonialsPage() {
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [loading, setLoading] = useState(true);
 
- useEffect(() => {
-    async function fetchTestimonials() {
-      try {
-        const { data, error } = await supabase
-          .from('testimonials')
-          .select('*')
-          .eq('is_approved', true);
+  const fetchTestimonials = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('testimonials')
+        .select('*')
+        .eq('is_approved', true)
+        .order('id', { ascending: false });
 
-        if (error) throw error;
-        if (data) setTestimonials(data);
-      } catch (error) {
-        console.error('Error fetching testimonials:', error);
-      } finally {
-        setLoading(false);
-      }
+      if (error) throw error;
+      if (data) setTestimonials(data);
+    } catch (error) {
+      console.error('Error fetching testimonials:', error);
+    } finally {
+      setLoading(false);
     }
+  };
 
+  useEffect(() => {
     fetchTestimonials();
+
+    // Opsional: Realtime listener agar halaman otomatis memperbarui data jika admin mengubah status
+    const channel = supabase
+      .channel('public:testimonials')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'testimonials' },
+        () => {
+          fetchTestimonials();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   return (
