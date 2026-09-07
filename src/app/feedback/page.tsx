@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
-import Navbar from '@/components/Navbar'; // <-- Mengimpor Navbar
+import Navbar from '@/components/Navbar';
 
 export default function FeedbackPage() {
   const [loading, setLoading] = useState(false);
@@ -20,6 +20,7 @@ export default function FeedbackPage() {
     const role = formData.get('role') as string;
     const message = formData.get('message') as string;
 
+    // 1. Simpan ke Database Supabase
     const { error } = await supabase
       .from('testimonials')
       .insert([{ name, role, message, is_approved: false }]);
@@ -30,6 +31,26 @@ export default function FeedbackPage() {
       console.error('Detail Error Supabase:', error);
       toast.error(`Gagal mengirim: ${error.message || 'Silakan coba lagi.'}`);
     } else {
+      // 2. Kirim Notifikasi ke Telegram Anda secara Instan via .env.local
+      try {
+        const TELEGRAM_BOT_TOKEN = process.env.NEXT_PUBLIC_TELEGRAM_BOT_TOKEN;
+        const TELEGRAM_CHAT_ID = process.env.NEXT_PUBLIC_TELEGRAM_CHAT_ID;
+
+        const textMessage = `🔔 *Feedback Baru Masuk di Portofolio!*\n\n👤 Nama: ${name}\n💼 Peran: ${role}\n💬 Pesan: "${message}"\n\nSegera cek dashboard admin untuk melakukan moderasi!`;
+
+        await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            chat_id: TELEGRAM_CHAT_ID,
+            text: textMessage,
+            parse_mode: 'Markdown',
+          }),
+        });
+      } catch (telegramError) {
+        console.error('Gagal mengirim notifikasi Telegram:', telegramError);
+      }
+
       toast.success('Terima kasih! Deskripsi Anda berhasil dikirim dan menunggu moderasi.');
       form.reset(); 
     }
@@ -37,10 +58,8 @@ export default function FeedbackPage() {
 
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-[#E5E5E5] relative">
-      {/* Menambahkan Navbar di posisi paling atas */}
       <Navbar />
 
-      {/* Mengubah padding-top (pt-24 atau pt-32) agar tidak tertutup Navbar yang sticky */}
       <main className="flex flex-col items-center justify-center px-4 pt-24 pb-12 sm:pt-32">
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
