@@ -22,7 +22,7 @@ export default function FeedbackPage() {
 
     const { error } = await supabase
       .from('testimonials')
-      .insert([{ name, role, message, status: 'pending' }]);
+      .insert([{ name, role, message, is_approved: false }]);
 
     setLoading(false);
 
