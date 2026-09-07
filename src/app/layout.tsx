@@ -17,6 +17,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Erlangga Aghna Fatah — Portfolio",
   description: "Personal Portfolio and Developer Showcase",
+  manifest: "/manifest.json", // <-- Tambahkan baris ini
 };
 
 export default function RootLayout({
