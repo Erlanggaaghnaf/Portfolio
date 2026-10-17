@@ -1,97 +1,188 @@
-'use client';
 
-import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import Link from 'next/link';
+"use client";
+
+import { useEffect, useState } from "react";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import Link from "next/link";
+
+const navLinks = [
+  { name: "Home", href: "/#home" },
+  { name: "About", href: "/#about" },
+  { name: "Projects", href: "/#skills-projects" },
+  { name: "Academic Track", href: "/#timeline" },
+  { name: "Testimonials", href: "/testimonials" },
+  { name: "Contact", href: "/#contact" },
+  { name: "Feedback", href: "/feedback" },
+];
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
+  const shouldReduceMotion = useReducedMotion();
 
-  // 1. Tambahkan menu Feedback dan perbarui link dengan prefix "/"
-  const navLinks = [
-    { name: 'Home', href: '/#home' },
-    { name: 'About', href: '/#about' },
-    { name: 'Projects', href: '/#skills-projects' },
-    { name: 'Academic Track', href: '/#timeline' },
-    { name: 'Testimonials', href: '/testimonials' },
-    { name: 'Contact', href: '/#contact' },
-    { name: 'Feedback', href: '/feedback' }, // <-- Menu baru
-  ];
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setIsOpen(false);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isOpen]);
+
+  const closeMenu = () => setIsOpen(false);
 
   return (
-    <header className="sticky top-6 z-50 w-full flex justify-center px-4">
-      <nav className="w-full max-w-4xl bg-neutral-900/60 backdrop-blur-xl border border-white/10 rounded-full px-6 py-3 shadow-[0_8px_32px_rgba(0,0,0,0.5)] flex items-center justify-between">
-        
-        {/* Logo / Inisial */}
-        <Link 
-          href="/#home" 
-          className="text-sm font-mono font-bold tracking-wider text-white bg-white/5 border border-white/10 px-3 py-1.5 rounded-full hover:bg-white/10 transition-all"
+    <header className="sticky top-3 z-50 flex w-full justify-center pt-3 sm:top-4 sm:pt-4">
+      <nav
+        aria-label="Navigasi utama"
+        className="flex w-full max-w-6xl items-center justify-between gap-3 rounded-2xl border border-white/[0.09] bg-[#0D111A]/90 px-3 py-3 shadow-[0_12px_40px_rgba(0,0,0,0.28)] backdrop-blur-2xl transition-colors duration-300 sm:rounded-full sm:px-5"
+      >
+        {/* Brand */}
+        <Link
+          href="/#home"
+          aria-label="Erlangga Aghna Fatah - beranda"
+          onClick={closeMenu}
+          className="group inline-flex min-w-0 shrink-0 items-center gap-2.5 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6B8CFF] focus-visible:ring-offset-4 focus-visible:ring-offset-[#0A0A0A]"
         >
-          EA
+          <span className="relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-white/15 bg-[#4B75FF] text-xs font-bold tracking-tight text-white shadow-[0_4px_18px_rgba(75,117,255,0.18)] transition-transform duration-300 group-hover:-rotate-3 group-hover:scale-[1.03]">
+            EA
+            <span
+              aria-hidden="true"
+              className="absolute -right-2 -top-2 h-5 w-5 rounded-full border border-white/20 bg-white/15"
+            />
+          </span>
+
+          <span className="hidden min-w-0 sm:block">
+            <span className="block truncate text-sm font-semibold tracking-[-0.035em] text-white">
+              Erlangga Aghna Fatah
+            </span>
+            <span className="mt-0.5 block font-mono text-[9px] uppercase tracking-[0.16em] text-white/40">
+              Developer Portfolio
+            </span>
+          </span>
         </Link>
 
-        {/* Desktop Menu */}
-        <div className="hidden md:flex items-center gap-1 font-mono text-xs text-white/70">
-          {navLinks.map((link, idx) => (
-            <Link 
-              key={idx}
+        {/* Desktop navigation */}
+        <div className="hidden items-center gap-0.5 xl:flex">
+          {navLinks.map((link) => (
+            <Link
+              key={link.name}
               href={link.href}
-              className="px-4 py-2 rounded-full hover:bg-white/5 hover:text-white transition-all"
+              className="group relative whitespace-nowrap rounded-full px-2.5 py-2 text-[11px] font-medium text-white/55 transition-colors duration-200 hover:bg-white/[0.04] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6B8CFF] 2xl:px-3 2xl:text-xs"
             >
               {link.name}
+              <span
+                aria-hidden="true"
+                className="absolute inset-x-3 bottom-1 h-px origin-left scale-x-0 bg-[#6B8CFF] transition-transform duration-200 group-hover:scale-x-100"
+              />
             </Link>
           ))}
         </div>
 
-        {/* Status Indikator */}
-        <div className="hidden md:flex items-center gap-2">
-          <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-xs font-mono text-emerald-400">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span>Available</span>
+        {/* Subtle technical label */}
+        <div className="hidden shrink-0 items-center gap-2 rounded-full border border-[#4B75FF]/20 bg-[#4B75FF]/[0.07] px-3 py-2 xl:flex">
+          <span
+            aria-hidden="true"
+            className="h-1.5 w-1.5 rounded-full bg-[#6B8CFF]"
+          />
+          <span className="font-mono text-[10px] tracking-wide text-[#AFC1FF]">
+            PORTFOLIO
           </span>
         </div>
 
-        {/* Mobile Menu Button */}
-        <button 
-          onClick={() => setIsOpen(!isOpen)}
-          className="md:hidden text-white/80 hover:text-white p-2 focus:outline-none"
-          aria-label="Toggle Menu"
+        {/* Mobile / tablet menu button */}
+        <button
+          type="button"
+          onClick={() => setIsOpen((open) => !open)}
+          aria-label={isOpen ? "Tutup menu navigasi" : "Buka menu navigasi"}
+          aria-expanded={isOpen}
+          aria-controls="mobile-navigation"
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/[0.025] text-white/75 transition-colors hover:border-[#6B8CFF]/40 hover:bg-[#4B75FF]/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6B8CFF] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0A0A0A] xl:hidden"
         >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg
+            aria-hidden="true"
+            className="h-5 w-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
             {isOpen ? (
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={1.6}
+                d="M6 6l12 12M18 6L6 18"
+              />
             ) : (
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={1.6}
+                d="M4 7h16M4 12h16M4 17h16"
+              />
             )}
           </svg>
         </button>
       </nav>
 
-      {/* Mobile Dropdown Menu */}
+      {/* Mobile / tablet dropdown */}
       <AnimatePresence>
         {isOpen && (
-          <motion.div 
-            initial={{ opacity: 0, y: -10, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -10, scale: 0.95 }}
-            transition={{ duration: 0.2 }}
-            className="absolute top-20 left-4 right-4 bg-neutral-900/95 backdrop-blur-2xl border border-white/10 rounded-3xl p-6 shadow-2xl flex flex-col space-y-4 md:hidden z-50"
+          <motion.div
+            id="mobile-navigation"
+            initial={{
+              opacity: 0,
+              y: shouldReduceMotion ? 0 : -8,
+            }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{
+              opacity: 0,
+              y: shouldReduceMotion ? 0 : -8,
+            }}
+            transition={{
+              duration: shouldReduceMotion ? 0 : 0.18,
+              ease: "easeOut",
+            }}
+            className="absolute left-3 right-3 top-[calc(100%+0.5rem)] max-h-[min(70vh,28rem)] overflow-y-auto rounded-2xl border border-white/10 bg-[#0D111A]/[0.98] p-3 shadow-[0_20px_60px_rgba(0,0,0,0.45)] backdrop-blur-2xl sm:left-5 sm:right-5 xl:hidden"
           >
-            {navLinks.map((link, idx) => (
-              <Link 
-                key={idx}
-                href={link.href}
-                onClick={() => setIsOpen(false)}
-                className="text-sm font-mono text-white/80 hover:text-white hover:bg-white/5 px-4 py-3 rounded-2xl transition-all"
-              >
-                {link.name}
-              </Link>
-            ))}
-            <div className="pt-2 border-t border-white/10 flex items-center justify-between px-2">
-              <span className="text-xs font-mono text-white/50">Status</span>
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-xs font-mono text-emerald-400">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                <span>Available for Hire</span>
+            <div className="mb-2 flex items-center justify-between border-b border-white/[0.07] px-3 pb-3 pt-1">
+              <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-white/40">
+                Navigation
+              </span>
+              <span className="font-mono text-[10px] text-[#AFC1FF]/70">
+                EA / 01
+              </span>
+            </div>
+
+            <div className="flex flex-col gap-1">
+              {navLinks.map((link, index) => (
+                <Link
+                  key={link.name}
+                  href={link.href}
+                  onClick={closeMenu}
+                  className="group flex items-center justify-between rounded-xl px-4 py-3 text-sm text-white/65 transition-colors duration-200 hover:bg-[#4B75FF]/[0.09] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#6B8CFF]"
+                >
+                  <span>{link.name}</span>
+                  <span className="font-mono text-[10px] text-white/25 transition-colors group-hover:text-[#AFC1FF]">
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
+                </Link>
+              ))}
+            </div>
+
+            <div className="mt-2 flex items-center gap-2 border-t border-white/[0.07] px-4 pt-3">
+              <span
+                aria-hidden="true"
+                className="h-1.5 w-1.5 rounded-full bg-[#6B8CFF]"
+              />
+              <span className="font-mono text-[10px] uppercase tracking-wider text-white/40">
+                Personal portfolio
               </span>
             </div>
           </motion.div>

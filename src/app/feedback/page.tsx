@@ -1,7 +1,6 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
-import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
 import Navbar from '@/components/Navbar';
@@ -9,50 +8,43 @@ import Navbar from '@/components/Navbar';
 export default function FeedbackPage() {
   const [loading, setLoading] = useState(false);
 
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
 
-    const form = e.currentTarget; 
+    const form = e.currentTarget;
     const formData = new FormData(form);
-    
-    const name = formData.get('name') as string;
-    const role = formData.get('role') as string;
-    const message = formData.get('message') as string;
 
-    // 1. Simpan ke Database Supabase
-    const { error } = await supabase
-      .from('testimonials')
-      .insert([{ name, role, message, is_approved: false }]);
+    const name = String(formData.get('name') ?? '');
+    const role = String(formData.get('role') ?? '');
+    const message = String(formData.get('message') ?? '');
 
-    setLoading(false);
+    try {
+      const response = await fetch('/api/feedback', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name, role, message }),
+      });
 
-    if (error) {
-      console.error('Detail Error Supabase:', error);
-      toast.error(`Gagal mengirim: ${error.message || 'Silakan coba lagi.'}`);
-    } else {
-      // 2. Kirim Notifikasi ke Telegram Anda secara Instan via .env.local
-      try {
-        const TELEGRAM_BOT_TOKEN = process.env.NEXT_PUBLIC_TELEGRAM_BOT_TOKEN;
-        const TELEGRAM_CHAT_ID = process.env.NEXT_PUBLIC_TELEGRAM_CHAT_ID;
+      const result = await response.json();
 
-        const textMessage = `🔔 *Feedback Baru Masuk di Portofolio!*\n\n👤 Nama: ${name}\n💼 Peran: ${role}\n💬 Pesan: "${message}"\n\nSegera cek dashboard admin untuk melakukan moderasi!`;
-
-        await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            chat_id: TELEGRAM_CHAT_ID,
-            text: textMessage,
-            parse_mode: 'Markdown',
-          }),
-        });
-      } catch (telegramError) {
-        console.error('Gagal mengirim notifikasi Telegram:', telegramError);
+      if (!response.ok) {
+        toast.error(result.error || 'Feedback gagal dikirim.');
+        return;
       }
 
-      toast.success('Terima kasih! Deskripsi Anda berhasil dikirim dan menunggu moderasi.');
-      form.reset(); 
+      toast.success(
+        'Terima kasih! Feedback berhasil dikirim dan menunggu moderasi.'
+      );
+
+      form.reset();
+    } catch {
+      toast.error('Tidak dapat menghubungi server. Silakan coba lagi.');
+    } finally {
+      setLoading(false);
     }
   };
 
