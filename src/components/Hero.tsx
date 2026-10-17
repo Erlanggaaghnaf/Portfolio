@@ -1,159 +1,192 @@
-'use client';
+"use client";
 
-import { motion, useReducedMotion } from 'framer-motion';
-import { useState, useEffect } from 'react';
-import SpotlightCard from '@/components/SpotlightCard';
+import { motion, useReducedMotion } from "framer-motion";
+import SpotlightCard from "@/components/SpotlightCard";
 
 const codeLines = [
-  "const engineer = {",
-  "  name: 'Erlangga',",
-  "  institution: 'UNESA S1 Informatics',",
-  "  focus: ['Full-Stack', 'Deep Learning'],",
-  "  available: true",
-  "};"
+  { number: "01", content: "const developer = {" },
+  { number: "02", content: '  name: "Erlangga",' },
+  { number: "03", content: '  field: "Informatika",' },
+  { number: "04", content: '  focus: ["Web", "AI"],' },
+  { number: "05", content: "};" },
 ];
 
 export default function Hero() {
-  const shouldReduceMotion = useReducedMotion();
-  const [displayedText, setDisplayedText] = useState<string[]>([]);
-  const [currentLineIndex, setCurrentLineIndex] = useState(0);
-  const [currentCharIndex, setCurrentCharIndex] = useState(0);
+  const reduceMotion = useReducedMotion();
 
-  useEffect(() => {
-    if (shouldReduceMotion) {
-      return;
-    }
-
-    if (currentLineIndex < codeLines.length) {
-      const targetLine = codeLines[currentLineIndex];
-      if (currentCharIndex <= targetLine.length) {
-        const timeout = setTimeout(() => {
-          setDisplayedText(prev => {
-            const updated = [...prev];
-            updated[currentLineIndex] = targetLine.substring(0, currentCharIndex);
-            return updated;
-          });
-          setCurrentCharIndex(prev => prev + 1);
-        }, 40);
-        return () => clearTimeout(timeout);
-      } else {
-        const timeout = setTimeout(() => {
-          setCurrentLineIndex(prev => prev + 1);
-          setCurrentCharIndex(0);
-        }, 300);
-        return () => clearTimeout(timeout);
-      }
-    } else {
-      const resetTimeout = setTimeout(() => {
-        setDisplayedText([]);
-        setCurrentLineIndex(0);
-        setCurrentCharIndex(0);
-      }, 3500);
-      return () => clearTimeout(resetTimeout);
-    }
-  }, [currentLineIndex, currentCharIndex, shouldReduceMotion]);
-
-  const visibleCodeLines = shouldReduceMotion ? codeLines : displayedText;
+  const animationDuration = reduceMotion ? 0 : 0.55;
 
   return (
-    <section id="home" className="relative pt-4 sm:pt-8 pb-12 sm:pb-20">
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 items-center">
-        
-        <motion.div 
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
-          className="lg:col-span-7 flex flex-col items-start text-left space-y-6"
-        >
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/5 border border-white/10 backdrop-blur-md text-xs font-medium text-white/80">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400"></span>
-            </span>
-            <span>Available for Research &amp; Projects</span>
-          </div>
+    <section
+      id="home"
+      aria-labelledby="hero-heading"
+      className="relative grid scroll-mt-28 grid-cols-1 items-center gap-10 pb-10 pt-12 sm:gap-12 sm:pt-20 lg:grid-cols-12 lg:gap-12 lg:pb-20 lg:pt-24"
+    >
+      {/* Introduction */}
+      <motion.div
+        initial={reduceMotion ? false : { opacity: 0, y: 18 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{
+          duration: animationDuration,
+          ease: "easeOut",
+        }}
+        className="flex min-w-0 flex-col items-start gap-7 lg:col-span-7"
+      >
+        <div className="inline-flex items-center gap-2.5 rounded-full border border-[#4B75FF]/25 bg-[#4B75FF]/[0.07] px-3.5 py-2">
+          <span
+            aria-hidden="true"
+            className="h-1.5 w-1.5 rounded-full bg-[#6B8CFF]"
+          />
+          <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-[#B4C4FF]">
+            Personal Portfolio
+          </span>
+        </div>
 
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-white leading-[1.12]">
-            Hi, I&apos;m Erlangga — <br className="hidden sm:inline" />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-[#E5E5E5] to-white/50">
-              I build web &amp; AI solutions
+        <div className="space-y-5">
+          <p className="font-mono text-xs tracking-wide text-white/45">
+            Halo, saya Erlangga.
+          </p>
+
+          <h1
+            id="hero-heading"
+            className="max-w-3xl text-[2.65rem] font-semibold leading-[1.06] tracking-[-0.055em] text-white sm:text-6xl lg:text-[4.5rem] lg:leading-[1.04]"
+          >
+            Membangun produk digital dengan{" "}
+            <span className="text-[#6B8CFF]">
+              tujuan yang jelas.
             </span>
           </h1>
 
-          <div className="space-y-2 max-w-xl">
-            <p className="text-base sm:text-lg text-white/80 font-medium">
-              Mahasiswa S1 Teknik Informatika UNESA.
-            </p>
-            <p className="text-sm sm:text-base text-white/50">
-              Passionate in merging modern web engineering with machine learning architectures. Crafting performant, accessible digital systems.
-            </p>
-          </div>
+          <p className="max-w-xl text-sm leading-7 text-[#A1A7B4] sm:text-base sm:leading-8">
+            Mahasiswa S1 Teknik Informatika UNESA yang tertarik pada
+            pengembangan aplikasi web dan eksplorasi kecerdasan buatan
+            melalui proyek nyata.
+          </p>
+        </div>
 
-          <div className="flex flex-wrap items-center gap-3.5 pt-3 w-full sm:w-auto">
-            <a 
-              href="/cv-erlangga.pdf" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="w-full sm:w-auto text-center px-6 py-3 rounded-full bg-[#E5E5E5] text-black font-semibold text-sm hover:bg-white hover:scale-105 active:scale-95 transition-all shadow-[0_0_24px_rgba(255,255,255,0.2)] flex items-center justify-center gap-2"
-            >
-              <span>Lihat CV</span>
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-              </svg>
-            </a>
-            
-            <a 
-              href="/cv-erlangga.pdf" 
-              download="CV_Erlangga_Aghna_Fatah.pdf"
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-neutral-900/60 border border-white/10 text-[#E5E5E5] font-medium text-sm hover:bg-white/10 hover:border-white/20 hover:text-white transition-all backdrop-blur-md"
-            >
-              <span>Download CV</span>
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
-              </svg>
-            </a>
-          </div>
-        </motion.div>
+        {/* Calls to action */}
+        <div className="flex w-full flex-col gap-3 pt-1 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center">
+          <a
+            href="#skills-projects"
+            className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-[#4B75FF] px-6 text-sm font-semibold text-white transition-[background-color,transform,box-shadow] duration-200 hover:-translate-y-0.5 hover:bg-[#5D80FF] hover:shadow-[0_8px_28px_rgba(75,117,255,0.2)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8EA5FF] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0A0A0A] active:translate-y-0"
+          >
+            Lihat Proyek
+            <span aria-hidden="true">↗</span>
+          </a>
 
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
-          className="lg:col-span-5 w-full flex justify-center"
-        >
-          <SpotlightCard className="w-full max-w-md p-5 sm:p-6 shadow-2xl relative overflow-hidden">
-            <div className="flex items-center justify-between border-b border-white/10 pb-3 mb-4">
-              <div className="flex items-center gap-2">
-                <span className="w-3 h-3 rounded-full bg-red-500/80 inline-block"></span>
-                <span className="w-3 h-3 rounded-full bg-yellow-500/80 inline-block"></span>
-                <span className="w-3 h-3 rounded-full bg-emerald-500/80 inline-block"></span>
-              </div>
-              <span className="text-[11px] font-mono text-white/50">erlangga.tsx</span>
+          <a
+            href="/cv-erlangga.pdf"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-white/15 bg-white/[0.025] px-6 text-sm font-medium text-white/80 transition-[background-color,border-color,color] duration-200 hover:border-white/30 hover:bg-white/[0.06] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8EA5FF] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0A0A0A]"
+          >
+            Lihat CV
+            <span aria-hidden="true">↗</span>
+          </a>
+
+          <a
+            href="/cv-erlangga.pdf"
+            download="CV_Erlangga_Aghna_Fatah.pdf"
+            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-4 text-sm text-white/50 transition-colors duration-200 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8EA5FF] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0A0A0A]"
+          >
+            Download CV
+            <span aria-hidden="true">↓</span>
+          </a>
+        </div>
+
+        {/* Personal note */}
+        <div className="mt-1 flex items-start gap-3 border-t border-white/10 pt-5">
+          <span
+            aria-hidden="true"
+            className="mt-0.5 h-8 w-[2px] shrink-0 rounded-full bg-[#4B75FF]"
+          />
+          <p className="max-w-sm text-xs leading-6 text-white/45">
+            Fokus pada proses belajar, eksperimen, dan membangun solusi
+            yang berguna.
+          </p>
+        </div>
+      </motion.div>
+
+      {/* Developer profile card */}
+      <motion.div
+        initial={reduceMotion ? false : { opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{
+          duration: animationDuration,
+          delay: reduceMotion ? 0 : 0.12,
+          ease: "easeOut",
+        }}
+        className="min-w-0 lg:col-span-5"
+      >
+        <SpotlightCard className="relative overflow-hidden rounded-2xl border border-white/[0.09] bg-[#10141C] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.25)] sm:p-7">
+          {/* Decorative light */}
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute -right-20 -top-24 h-64 w-64 rounded-full bg-[#4B75FF]/[0.12] blur-3xl"
+          />
+
+          {/* Window header */}
+          <div className="relative flex items-center justify-between border-b border-white/[0.09] pb-4">
+            <div className="flex items-center gap-2">
+              <span className="h-2.5 w-2.5 rounded-full bg-white/20" />
+              <span className="h-2.5 w-2.5 rounded-full bg-white/20" />
+              <span className="h-2.5 w-2.5 rounded-full bg-[#4B75FF]" />
             </div>
-            
-            <div className="font-mono text-xs leading-relaxed space-y-1.5 text-white/80 min-h-[120px]">
-              {visibleCodeLines.map((line, idx) => (
-                <div key={`${idx}-${line}`} className="whitespace-pre">
-                  {idx === 0 ? (
-                    <>
-                      <span className="text-purple-400">const </span>
-                      <span className="text-blue-300">engineer </span>
-                      {line.slice("const engineer".length)}
-                    </>
-                  ) : (
-                    line
-                  )}
+
+            <span className="font-mono text-[10px] tracking-wide text-white/40">
+              ABOUT_ME.ts
+            </span>
+          </div>
+
+          {/* Code content */}
+          <div className="relative space-y-5 py-7">
+            <p className="font-mono text-[10px] uppercase tracking-[0.15em] text-[#829BFF]">
+              {"// A short introduction"}
+            </p>
+
+            <div
+              aria-label="Ringkasan profil developer dalam format kode"
+              className="space-y-3 overflow-x-auto pb-1"
+            >
+              {codeLines.map((line) => (
+                <div
+                  key={line.number}
+                  className="flex min-w-max gap-5 font-mono text-xs sm:text-sm"
+                >
+                  <span
+                    aria-hidden="true"
+                    className="w-5 shrink-0 select-none text-right text-white/20"
+                  >
+                    {line.number}
+                  </span>
+
+                  <code
+                    className={`whitespace-pre ${
+                      line.content.includes("const")
+                        ? "text-[#B4C4FF]"
+                        : "text-white/75"
+                    }`}
+                  >
+                    {line.content}
+                  </code>
                 </div>
               ))}
-              {!shouldReduceMotion && (
-                <span className="ml-1 inline-block h-3.5 w-2 animate-pulse bg-emerald-400" />
-              )}
             </div>
-          </SpotlightCard>
-        </motion.div>
+          </div>
 
-      </div>
+          {/* Card footer */}
+          <div className="relative flex items-center justify-between gap-3 border-t border-white/[0.09] pt-4">
+            <span className="font-mono text-[10px] tracking-wide text-white/35">
+              LEARNING BY BUILDING
+            </span>
+
+            <span
+              aria-label="Aksen visual"
+              className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#6B8CFF]"
+            />
+          </div>
+        </SpotlightCard>
+      </motion.div>
     </section>
   );
 }

@@ -1,29 +1,160 @@
+
 @import "tailwindcss";
 
-body {
-  background-color: #0A0A0A;
-  color: #E5E5E5;
-  overflow-x: hidden;
-  font-family: 'Inter', sans-serif;
+:root {
+  color-scheme: dark;
+  --background: #0b0d12;
+  --surface: #11151d;
+  --surface-raised: #171c27;
+  --foreground: #f4f5f7;
+  --muted: #a1a7b4;
+  --border: rgba(255, 255, 255, 0.1);
+  --cobalt: #4b75ff;
+  --cobalt-hover: #6b8cff;
 }
 
-/* Apple style smooth spring transition tokens */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 7rem;
+}
+
+body {
+  min-height: 100vh;
+  margin: 0;
+  overflow-x: clip;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: rgba(75, 117, 255, 0.35);
+  color: #fff;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+button,
+a,
+input,
+textarea,
+select {
+  -webkit-tap-highlight-color: transparent;
+}
+
+:focus-visible {
+  outline: 2px solid var(--cobalt-hover);
+  outline-offset: 4px;
+}
+
+section[id] {
+  scroll-margin-top: 7rem;
+}
+
+::placeholder {
+  color: #747b89;
+  opacity: 1;
+}
+
 .spring-bounce {
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transition:
+    transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1),
+    border-color 0.25s ease,
+    background-color 0.25s ease;
 }
 
 .spring-hover {
-  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s ease, color 0.2s ease;
+  transition:
+    transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1),
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
 }
 
-/* Subtle glow accent */
+.spring-hover:hover {
+  transform: translateY(-2px);
+}
+
 .glow-radial {
-  background: radial-gradient(600px circle at 50% -20%, rgba(255, 255, 255, 0.08), transparent 70%);
+  background:
+    radial-gradient(
+      ellipse at 75% 0%,
+      rgba(75, 117, 255, 0.14),
+      transparent 48%
+    );
 }
 
-/* GPU Acceleration for smooth animations */
 .gpu-accelerated {
   transform: translateZ(0);
   backface-visibility: hidden;
-  perspective: 1000px;
+}
+
+.editorial-label {
+  color: var(--cobalt-hover);
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.editorial-rule {
+  height: 1px;
+  width: 100%;
+  background: var(--border);
+}
+
+.editorial-panel {
+  border: 1px solid var(--border);
+  border-radius: 1.25rem;
+  background: linear-gradient(
+    145deg,
+    rgba(23, 28, 39, 0.92),
+    rgba(17, 21, 29, 0.92)
+  );
+}
+
+.editorial-link {
+  text-decoration-color: rgba(107, 140, 255, 0.55);
+  text-underline-offset: 5px;
+  transition: color 0.2s ease;
+}
+
+.editorial-link:hover {
+  color: var(--cobalt-hover);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
