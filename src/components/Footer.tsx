@@ -9,7 +9,7 @@ export default function Footer() {
         </div>
         <div className="flex items-center gap-5">
           <span className="inline-flex items-center gap-1.5 text-white/40">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> All Systems Normal
+            <span aria-hidden="true" className="w-1.5 h-1.5 rounded-full bg-[#6B8CFF]"></span> Portofolio pribadi
           </span>
           <a href="#home" className="px-3 py-1 rounded-full bg-white/5 hover:bg-white/15 border border-white/10 text-white/70 hover:text-white transition-all flex items-center gap-1.5 font-medium">
             <span>Back to top</span>

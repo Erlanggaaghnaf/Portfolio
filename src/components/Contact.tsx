@@ -1,12 +1,24 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import { useTransition } from 'react';
 import { toast } from 'sonner';
 import { sendEmail } from '@/app/actions';
 
 export default function Contact() {
   const [isPending, startTransition] = useTransition();
+  const reduceMotion = useReducedMotion();
+
+  const reveal = (delay = 0) => ({
+    initial: reduceMotion ? false : { opacity: 0, y: 10 },
+    whileInView: { opacity: 1, y: 0 },
+    viewport: { once: true, amount: 0.1 },
+    transition: {
+      duration: reduceMotion ? 0 : 0.4,
+      delay: reduceMotion ? 0 : delay,
+      ease: 'easeOut' as const,
+    },
+  });
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -16,11 +28,21 @@ export default function Contact() {
     const toastId = toast.loading('Mengirim pesan ke server...');
 
     startTransition(async () => {
-      const result = await sendEmail(formData);
-      if (result.success) {
-        toast.success('Pesan berhasil terkirim! Terima kasih telah menghubungi.', { id: toastId });
-        formElement.reset();
-      } else {
+      try {
+        const result = await sendEmail(formData);
+        if (result.success) {
+          toast.success('Pesan berhasil terkirim! Terima kasih telah menghubungi.', { id: toastId });
+          formElement.reset();
+        } else {
+          const message =
+            result.reason === 'invalid_input'
+              ? 'Periksa kembali nama, email, dan pesan Anda.'
+              : result.reason === 'rate_limited'
+                ? 'Batas pengiriman tercapai. Coba lagi dalam beberapa menit.'
+                : 'Gagal mengirim pesan. Silakan coba beberapa saat lagi.';
+          toast.error(message, { id: toastId });
+        }
+      } catch {
         toast.error('Gagal mengirim pesan. Silakan coba beberapa saat lagi.', { id: toastId });
       }
     });
@@ -31,11 +53,8 @@ export default function Contact() {
       <div className="absolute -top-10 left-1/4 w-96 h-96 bg-white/[0.03] rounded-full blur-3xl pointer-events-none -z-10"></div>
       
       {/* Section Header */}
-      <motion.div 
-        initial={{ opacity: 0, scale: 0.98 }}
-        whileInView={{ opacity: 1, scale: 1 }}
-        viewport={{ once: false, amount: 0.1 }}
-        transition={{ duration: 0.4, ease: "easeOut" }}
+      <motion.div
+        {...reveal()}
         className="gpu-accelerated flex flex-col items-start text-left space-y-4 max-w-3xl"
       >
         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/5 border border-white/15 backdrop-blur-md text-xs font-medium text-white/90 shadow-sm">
@@ -57,11 +76,8 @@ export default function Contact() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
         
         {/* Left Box: Info & Socials */}
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.98 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: false, amount: 0.1 }}
-          transition={{ duration: 0.4, delay: 0.1, ease: "easeOut" }}
+        <motion.div
+          {...reveal(0.1)}
           className="gpu-accelerated lg:col-span-5 flex flex-col justify-between space-y-6 bg-neutral-900/60 backdrop-blur-xl border border-white/10 rounded-3xl p-6 sm:p-8 shadow-[0_8px_32px_rgba(0,0,0,0.5)]"
         >
           <div className="space-y-4">
@@ -153,11 +169,8 @@ export default function Contact() {
         </motion.div>
 
         {/* Right Box: Form */}
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.98 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: false, amount: 0.1 }}
-          transition={{ duration: 0.4, delay: 0.2, ease: "easeOut" }}
+        <motion.div
+          {...reveal(0.2)}
           className="gpu-accelerated lg:col-span-7 bg-neutral-900/60 backdrop-blur-xl border border-white/10 rounded-3xl p-6 sm:p-8 shadow-[0_8px_32px_rgba(0,0,0,0.5)] flex flex-col justify-between"
         >
           <div className="space-y-2 mb-6">
@@ -168,17 +181,17 @@ export default function Contact() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-mono text-white/60 mb-2 uppercase tracking-wider">Nama Lengkap</label>
-                <input type="text" name="name" required placeholder="Erlangga" className="w-full bg-white/[0.03] border border-white/10 rounded-2xl p-4 text-sm text-white placeholder-white/30 focus:outline-none focus:border-white/40" />
+                <label htmlFor="contact-name" className="block text-xs font-mono text-white/60 mb-2 uppercase tracking-wider">Nama Lengkap</label>
+                <input id="contact-name" type="text" name="name" required placeholder="Erlangga" className="w-full bg-white/[0.03] border border-white/10 rounded-2xl p-4 text-sm text-white placeholder-white/30 focus:outline-none focus:border-white/40" />
               </div>
               <div>
-                <label className="block text-xs font-mono text-white/60 mb-2 uppercase tracking-wider">Email</label>
-                <input type="email" name="email" required placeholder="example@gmail.com" className="w-full bg-white/[0.03] border border-white/10 rounded-2xl p-4 text-sm text-white placeholder-white/30 focus:outline-none focus:border-white/40" />
+                <label htmlFor="contact-email" className="block text-xs font-mono text-white/60 mb-2 uppercase tracking-wider">Email</label>
+                <input id="contact-email" type="email" name="email" required placeholder="example@gmail.com" className="w-full bg-white/[0.03] border border-white/10 rounded-2xl p-4 text-sm text-white placeholder-white/30 focus:outline-none focus:border-white/40" />
               </div>
             </div>
             <div>
-              <label className="block text-xs font-mono text-white/60 mb-2 uppercase tracking-wider">Pesan</label>
-              <textarea name="message" required rows={4} placeholder="Kirimkan pesan Anda di sini..." className="w-full bg-white/[0.03] border border-white/10 rounded-2xl p-4 text-sm text-white placeholder-white/30 focus:outline-none focus:border-white/40 resize-none"></textarea>
+              <label htmlFor="contact-message" className="block text-xs font-mono text-white/60 mb-2 uppercase tracking-wider">Pesan</label>
+              <textarea id="contact-message" name="message" required rows={4} placeholder="Kirimkan pesan Anda di sini..." className="w-full bg-white/[0.03] border border-white/10 rounded-2xl p-4 text-sm text-white placeholder-white/30 focus:outline-none focus:border-white/40 resize-none"></textarea>
             </div>
             <div className="pt-2 flex items-center justify-between gap-4">
               <span className="text-[11px] text-white/40 font-mono">Data terlindungi secara privat.</span>
