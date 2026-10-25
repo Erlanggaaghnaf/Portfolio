@@ -40,8 +40,7 @@ async function getTrustedClientIp(): Promise<string | null> {
     .get('x-vercel-forwarded-for')
     ?.trim();
 
-  // Vercel documents this as the requester's public IP. Reject missing,
-  // malformed, or multi-hop values instead of trusting arbitrary headers.
+  // Reject missing, malformed, or multi-hop IP values.
   if (!forwardedIp || forwardedIp.includes(',') || isIP(forwardedIp) === 0) {
     return null;
   }
@@ -52,15 +51,21 @@ async function getTrustedClientIp(): Promise<string | null> {
 export async function sendEmail(formData: FormData) {
   return processContactForm(formData, {
     getClientIp: getTrustedClientIp,
+
     async isRateLimited(ip) {
       const { success } = await getContactLimiter().limit(ip);
       return !success;
     },
+
     async sendEmail({ name, email, message }) {
       const apiKey = process.env.RESEND_API_KEY;
-      if (!apiKey) throw new Error('Email provider is not configured.');
+
+      if (!apiKey) {
+        throw new Error('Email provider is not configured.');
+      }
 
       const resend = new Resend(apiKey);
+
       return resend.emails.send({
         from: 'Portfolio Contact <onboarding@resend.dev>',
         to: ['erlanggafatah6@gmail.com'],
