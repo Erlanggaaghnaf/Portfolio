@@ -1,66 +1,78 @@
 'use server';
 
+import { isIP } from 'node:net';
+import { headers } from 'next/headers';
+import { Ratelimit } from '@upstash/ratelimit';
+import { Redis } from '@upstash/redis';
 import { Resend } from 'resend';
+import {
+  CONTACT_RATE_LIMIT,
+  processContactForm,
+} from '../lib/contact-action-core';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+let contactLimiter: Ratelimit | undefined;
 
-const MAX_NAME_LENGTH = 100;
-const MAX_EMAIL_LENGTH = 254;
-const MAX_MESSAGE_LENGTH = 5000;
+function getContactLimiter(): Ratelimit {
+  const url = process.env.UPSTASH_REDIS_REST_URL;
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
 
-function getStringField(formData: FormData, fieldName: string): string | null {
-  const value = formData.get(fieldName);
-  return typeof value === 'string' ? value.trim() : null;
+  if (!url || !token) {
+    throw new Error('Contact rate limiter is not configured.');
+  }
+
+  if (!contactLimiter) {
+    contactLimiter = new Ratelimit({
+      redis: new Redis({ url, token }),
+      limiter: Ratelimit.slidingWindow(
+        CONTACT_RATE_LIMIT.requests,
+        CONTACT_RATE_LIMIT.window
+      ),
+      prefix: CONTACT_RATE_LIMIT.prefix,
+    });
+  }
+
+  return contactLimiter;
 }
 
-function isValidEmail(email: string): boolean {
-  if (email.length > MAX_EMAIL_LENGTH) return false;
+async function getTrustedClientIp(): Promise<string | null> {
+  const requestHeaders = await headers();
+  const forwardedIp = requestHeaders
+    .get('x-vercel-forwarded-for')
+    ?.trim();
 
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  // Reject missing, malformed, or multi-hop IP values.
+  if (!forwardedIp || forwardedIp.includes(',') || isIP(forwardedIp) === 0) {
+    return null;
+  }
+
+  return forwardedIp;
 }
 
 export async function sendEmail(formData: FormData) {
-  const name = getStringField(formData, 'name');
-  const email = getStringField(formData, 'email');
-  const message = getStringField(formData, 'message');
+  return processContactForm(formData, {
+    getClientIp: getTrustedClientIp,
 
-  if (
-    !name ||
-    !email ||
-    !message ||
-    name.length > MAX_NAME_LENGTH ||
-    !isValidEmail(email) ||
-    message.length > MAX_MESSAGE_LENGTH
-  ) {
-    return {
-      success: false as const,
-      error: 'Periksa kembali nama, alamat email, dan pesan Anda.',
-    };
-  }
+    async isRateLimited(ip) {
+      const { success } = await getContactLimiter().limit(ip);
+      return !success;
+    },
 
-  try {
-    const result = await resend.emails.send({
-      from: 'Portfolio Contact <onboarding@resend.dev>',
-      to: ['erlanggafatah6@gmail.com'],
-      subject: `Pesan Baru dari Portfolio: ${name}`,
-      replyTo: email,
-      text: `Nama: ${name}\nEmail: ${email}\n\nPesan:\n${message}`,
-    });
+    async sendEmail({ name, email, message }) {
+      const apiKey = process.env.RESEND_API_KEY;
 
-    if (result.error || !result.data?.id) {
-      console.error('Resend gagal mengirim pesan kontak.');
-      return {
-        success: false as const,
-        error: 'Pesan gagal dikirim. Silakan coba beberapa saat lagi.',
-      };
-    }
+      if (!apiKey) {
+        throw new Error('Email provider is not configured.');
+      }
 
-    return { success: true as const };
-  } catch {
-    console.error('Terjadi kesalahan saat mengirim pesan kontak.');
-    return {
-      success: false as const,
-      error: 'Pesan gagal dikirim. Silakan coba beberapa saat lagi.',
-    };
-  }
+      const resend = new Resend(apiKey);
+
+      return resend.emails.send({
+        from: 'Portfolio Contact <onboarding@resend.dev>',
+        to: ['erlanggafatah6@gmail.com'],
+        subject: `Pesan Baru dari Portfolio: ${name}`,
+        replyTo: email,
+        text: `Nama: ${name}\nEmail: ${email}\n\nPesan:\n${message}`,
+      });
+    },
+  });
 }

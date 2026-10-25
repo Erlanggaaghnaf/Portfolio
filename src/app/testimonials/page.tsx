@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import { supabase } from '@/lib/supabase';
 import Navbar from '@/components/Navbar';
 import SpotlightCard from '@/components/SpotlightCard';
@@ -17,6 +17,7 @@ type Testimonial = {
 export default function TestimonialsPage() {
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [loading, setLoading] = useState(true);
+  const reduceMotion = useReducedMotion();
 
   useEffect(() => {
     let cancelled = false;
@@ -72,8 +73,9 @@ export default function TestimonialsPage() {
 
       <main className="mx-auto flex max-w-6xl flex-col items-center space-y-12 px-4 pb-20 pt-28">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={reduceMotion ? false : { opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: reduceMotion ? 0 : 0.35, ease: 'easeOut' }}
           className="flex w-full max-w-3xl flex-col items-start space-y-4 text-left"
         >
           <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3.5 py-1.5 text-xs font-medium tracking-wide text-emerald-400">

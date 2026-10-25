@@ -2,11 +2,12 @@
 
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import Navbar from '@/components/Navbar';
 
 export default function FeedbackPage() {
   const [loading, setLoading] = useState(false);
+  const reduceMotion = useReducedMotion();
 
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -53,9 +54,10 @@ export default function FeedbackPage() {
       <Navbar />
 
       <main className="flex flex-col items-center justify-center px-4 pt-24 pb-12 sm:pt-32">
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
+        <motion.div
+          initial={reduceMotion ? false : { opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: reduceMotion ? 0 : 0.35, ease: 'easeOut' }}
           className="w-full max-w-xl bg-neutral-900/60 backdrop-blur-xl border border-white/10 rounded-3xl p-8 shadow-[0_8px_32px_rgba(0,0,0,0.5)] space-y-6"
         >
           <div className="space-y-2 text-left">
@@ -68,18 +70,18 @@ export default function FeedbackPage() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-xs font-mono text-white/60 mb-2 uppercase tracking-wider">Nama Anda</label>
-              <input type="text" name="name" required placeholder="John Doe" className="w-full bg-white/[0.03] border border-white/10 rounded-2xl p-4 text-sm text-white placeholder-white/30 focus:outline-none focus:border-white/40" />
+              <label htmlFor="feedback-name" className="block text-xs font-mono text-white/60 mb-2 uppercase tracking-wider">Nama Anda</label>
+              <input id="feedback-name" type="text" name="name" required placeholder="John Doe" className="w-full bg-white/[0.03] border border-white/10 rounded-2xl p-4 text-sm text-white placeholder-white/30 focus:outline-none focus:border-white/40" />
             </div>
 
             <div>
-              <label className="block text-xs font-mono text-white/60 mb-2 uppercase tracking-wider">Peran / Profesi / Instansi</label>
-              <input type="text" name="role" required placeholder="Software Engineer / Kolega" className="w-full bg-white/[0.03] border border-white/10 rounded-2xl p-4 text-sm text-white placeholder-white/30 focus:outline-none focus:border-white/40" />
+              <label htmlFor="feedback-role" className="block text-xs font-mono text-white/60 mb-2 uppercase tracking-wider">Peran / Profesi / Instansi</label>
+              <input id="feedback-role" type="text" name="role" required placeholder="Software Engineer / Kolega" className="w-full bg-white/[0.03] border border-white/10 rounded-2xl p-4 text-sm text-white placeholder-white/30 focus:outline-none focus:border-white/40" />
             </div>
 
             <div>
-              <label className="block text-xs font-mono text-white/60 mb-2 uppercase tracking-wider">Deskripsi / Kesan</label>
-              <textarea name="message" required rows={4} placeholder="Tuliskan deskripsi atau testimoni tentang Erlangga..." className="w-full bg-white/[0.03] border border-white/10 rounded-2xl p-4 text-sm text-white placeholder-white/30 focus:outline-none focus:border-white/40 resize-none"></textarea>
+              <label htmlFor="feedback-message" className="block text-xs font-mono text-white/60 mb-2 uppercase tracking-wider">Deskripsi / Kesan</label>
+              <textarea id="feedback-message" name="message" required rows={4} placeholder="Tuliskan deskripsi atau testimoni tentang Erlangga..." className="w-full bg-white/[0.03] border border-white/10 rounded-2xl p-4 text-sm text-white placeholder-white/30 focus:outline-none focus:border-white/40 resize-none"></textarea>
             </div>
 
             <button type="submit" disabled={loading} className="w-full py-4 rounded-full bg-[#E5E5E5] text-black font-semibold text-sm hover:bg-white transition-all disabled:opacity-50">
